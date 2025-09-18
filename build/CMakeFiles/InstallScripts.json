@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/root/Workspace/wkp/bfv/MyBFV/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
