@@ -116,30 +116,31 @@ int main(int argc, char* argv[])
 	// context.encode(const_1_device , plain_const_1);
 	// scheme.encryptMsg(scheme.cipher_const_1 , plain_const_1);
 
+    uint64_tt* msg1;
+    uint64_tt* msg2;
+    cudaMalloc(&msg1, sizeof(uint64_tt) * slots);
+    cudaMalloc(&msg2, sizeof(uint64_tt) * slots);
+    
+    Plaintext plain_m1(N, L, target_level, slots);
+    Plaintext plain_m2(N, L, target_level, slots);
+
+    Ciphertext c1(N, L, L, slots);
+    Ciphertext c2(N, L, L, slots);
+    Ciphertext c3(N, L, L, slots);
+
+    Plaintext m1_dec(N, L, L, slots);
+    Plaintext m2_dec(N, L, L, slots);
+    Plaintext res1_dec(N, L, L, slots);
+    Plaintext res2_dec(N, L, L, slots);
+    Plaintext res3_dec(N, L, L, slots);
+
     size_t st_check_idx = 20;
     size_t ed_idx = 100;
 
     for( size_t T = 0 ; T < ed_idx ; ++T)
     {
-        uint64_tt* msg1;
-        uint64_tt* msg2;
-        cudaMalloc(&msg1, sizeof(uint64_tt) * slots);
         cudaMemcpy(msg1, mes1, sizeof(uint64_tt) * slots, cudaMemcpyHostToDevice);
-        cudaMalloc(&msg2, sizeof(uint64_tt) * slots);
         cudaMemcpy(msg2, mes2, sizeof(uint64_tt) * slots, cudaMemcpyHostToDevice);
-    
-        Plaintext plain_m1(N, L, target_level, slots);
-        Plaintext plain_m2(N, L, target_level, slots);
-    
-        Ciphertext c1(N, L, L, slots);
-        Ciphertext c2(N, L, L, slots);
-        Ciphertext c3(N, L, L, slots);
-    
-        Plaintext m1_dec(N, L, L, slots);
-        Plaintext m2_dec(N, L, L, slots);
-        Plaintext res1_dec(N, L, L, slots);
-        Plaintext res2_dec(N, L, L, slots);
-        Plaintext res3_dec(N, L, L, slots);
     
         uint64_tt* msg_dec;
         cudaMalloc(&msg_dec, sizeof(uint64_tt) * slots);
@@ -297,7 +298,7 @@ int main(int argc, char* argv[])
 
     float ecd_avg = (ecd*1000) / (float)(ed_idx - st_check_idx);
     float dcd_avg = (dcd*1000) / (float)(ed_idx - st_check_idx);
-    float enc_avg = (enc*10.00) / (float)(ed_idx - st_check_idx);
+    float enc_avg = (enc*1000) / (float)(ed_idx - st_check_idx);
     float dec_avg = (dec*1000) / (float)(ed_idx - st_check_idx);
     float hadd_avg = (hadd*1000) / (float)(ed_idx - st_check_idx);
     float cadd_avg = (cadd*1000) / (float)(ed_idx - st_check_idx);
