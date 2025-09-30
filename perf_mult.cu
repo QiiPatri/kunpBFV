@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
     uint64_tt* d_msg1; uint64_tt* d_msg2; cudaMalloc(&d_msg1,sizeof(uint64_tt)*slots); cudaMalloc(&d_msg2,sizeof(uint64_tt)*slots);
     cudaMemcpy(d_msg1, mes1, sizeof(uint64_tt)*slots, cudaMemcpyHostToDevice); cudaMemcpy(d_msg2, mes2, sizeof(uint64_tt)*slots, cudaMemcpyHostToDevice);
 
-    Plaintext plain1(N,L,L,slots); Plaintext plain2(N,L,L,slots);
+    Plaintext plain1(N,L,L,slots); Plaintext plain2(N,L,L,slots); Plaintext plain1_ntt(N,L,L,slots);
     Ciphertext c1(N,L,L,slots); Ciphertext c2(N,L,L,slots);
 
     const int round = 50; const int warmup = 10;
@@ -31,11 +31,11 @@ int main(int argc, char* argv[]){
     cudaEvent_t start,end; cudaEventCreate(&start); cudaEventCreate(&end);
 
     for(int i=0;i<round;++i){
-        context.encode(d_msg1, plain1); context.encode(d_msg2, plain2);
-        scheme.encryptMsg(c1, plain1); scheme.encryptMsg(c2, plain2);
+        context.encode(d_msg1, plain1); context.encode(d_msg2, plain2); context.encode_ntt(d_msg1, plain1_ntt); 
+        scheme.encryptMsg(c1, plain1); scheme.encryptMsg(c2, plain2); 
 
         cudaEventRecord(start); scheme.multAndEqual_23(c1, c2); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) hmult+=temp;
-        cudaEventRecord(start); scheme.multConstAndEqual(c1, plain1); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) cmult+=temp;
+        cudaEventRecord(start); scheme.multConstAndEqual(c1, plain1_ntt); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) cmult+=temp;
 
         Plaintext plain_dec(N,L,L,slots); cudaEventRecord(start); scheme.decryptMsg(plain_dec, sk, c1); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) dec+=temp;
     }

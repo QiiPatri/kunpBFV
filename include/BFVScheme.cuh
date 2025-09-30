@@ -233,13 +233,15 @@ void BFVScheme::multConstAndEqual(Ciphertext& cipher, Plaintext& cnst)
         throw invalid_argument("Ciphertexts are on level 0");
     }
 
-    cudaMemcpy(context.encode_buffer, cnst.mx_device, sizeof(uint64_tt) * N * (L+1), cudaMemcpyDeviceToDevice);
+    // cudaMemcpy(context.encode_buffer, cnst.mx_device, sizeof(uint64_tt) * N * (L+1), cudaMemcpyDeviceToDevice);
 
-    context.ToNTTInplace(context.encode_buffer, 0, K, 1, level+1, L+1);//NTT
+    // context.ToNTTInplace(context.encode_buffer, 0, K, 1, level+1, L+1);//NTT
 
-    barrett_2batch_device(cipher.cipher_device, context.encode_buffer, N, 0, 0, K, cipher.l+1, L+1);
+    // barrett_2batch_device(cipher.cipher_device, context.encode_buffer, N, 0, 0, K, cipher.l+1, L+1);
     // barrett_batch_device(cipher.ax_device, cnst.mx_device, N, 0, 0, K, cipher.l+1);
     // barrett_batch_device(cipher.bx_device, cnst.mx_device, N, 0, 0, K, cipher.l+1);
+
+    barrett_2batch_device(cipher.cipher_device, cnst.mx_device, N, 0, 0, K, cipher.l+1, L+1);
 }
 
 

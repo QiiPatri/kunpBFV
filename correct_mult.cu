@@ -24,10 +24,10 @@ int main(int argc, char* argv[]){
     uint64_tt *d_msg1, *d_msg2, *d_dec; cudaMalloc(&d_msg1,sizeof(uint64_tt)*slots); cudaMalloc(&d_msg2,sizeof(uint64_tt)*slots); cudaMalloc(&d_dec,sizeof(uint64_tt)*slots);
     cudaMemcpy(d_msg1, mes1, sizeof(uint64_tt)*slots, cudaMemcpyHostToDevice); cudaMemcpy(d_msg2, mes2, sizeof(uint64_tt)*slots, cudaMemcpyHostToDevice);
 
-    Plaintext plain1(N,L,L,slots); Plaintext plain2(N,L,L,slots);
+    Plaintext plain1(N,L,L,slots); Plaintext plain2(N,L,L,slots); Plaintext plain1_ntt(N,L,L,slots);
     Ciphertext c1(N,L,L,slots); Ciphertext c2(N,L,L,slots);
     cout << "进行编码和加密..." << endl;
-    context.encode(d_msg1, plain1); context.encode(d_msg2, plain2);
+    context.encode(d_msg1, plain1); context.encode(d_msg2, plain2); context.encode_ntt(d_msg1, plain1_ntt);
     scheme.encryptMsg(c1, plain1); scheme.encryptMsg(c2, plain2);
 
     // homomorphic multiply
@@ -35,7 +35,7 @@ int main(int argc, char* argv[]){
     scheme.multAndEqual_23(c1, c2);
     // multiply by constant
     cout << "进行密文-明文乘法..." << endl;
-    scheme.multConstAndEqual(c1, plain1);
+    scheme.multConstAndEqual(c1, plain1_ntt);
 
     Plaintext plain_dec(N,L,L,slots);
     cout << "进行解密和解码..." << endl;

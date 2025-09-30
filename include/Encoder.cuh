@@ -61,6 +61,23 @@ __host__ void BFVContext::encode(uint64_tt* vals, Plaintext& msg)
 	// // print_device_array(msg.mx_device, N, L+1, "encode");
 }
 
+__host__ void BFVContext::encode_ntt(uint64_tt* vals, Plaintext& msg)
+{
+	long mes_slots = msg.slots;
+	int level = msg.l;
+
+	// FromNTTInplace_for_BFV(vals ,0 ,0, 0, 0, 1);
+
+	// print_device_array(vals, N, "vals");
+
+	for( size_t i = 0 ; i < L + 1 ; ++i )
+		cudaMemcpy(msg.mx_device + i * slots, vals, sizeof(uint64_tt) * slots, cudaMemcpyDeviceToDevice);
+
+	//encode
+	ToNTTInplace(msg.mx_device, 0, K, 1, level+1, L+1);//NTT
+
+}
+
 __host__ void BFVContext::decode(Plaintext& msg, uint64_tt* vals)
 {
 	int l = msg.l;

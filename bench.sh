@@ -11,7 +11,7 @@ fi
 file=$1
 
 if [ "${file##*.}"x = "cu"x ];then
-    nvcc $file -o ${file%.*} -O3 -lntl -lgmp -ftz=true -prec-div=true -lineinfo
+    nvcc $file -o ${file%.*} -O3 -lntl -lgmp -ftz=true -prec-div=true
 fi
 
 # -cudart shared

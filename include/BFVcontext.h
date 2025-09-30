@@ -27,6 +27,7 @@ class BFVContext{
 	__host__ void rescaleAndEqual(uint64_tt* device_a, int l);
 
 	__host__ void encode(uint64_tt* vals, Plaintext& msg);
+	__host__ void encode_ntt(uint64_tt* vals, Plaintext& msg);
 	__host__ void encode2(uint64_tt* vals, Plaintext& msg);
 	__host__ void decode(Plaintext& msg, uint64_tt* vals);
 
