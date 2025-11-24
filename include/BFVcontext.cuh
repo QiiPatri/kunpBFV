@@ -39,6 +39,10 @@ BFVContext::BFVContext(size_t poly_modulus_degree_)
 	q_num = qVec.size();
 	p_num = pVec.size();
 	t_num = tVec.size();
+	if(q_num == 0){
+		//退出程序
+		exit(-1);
+	}
 	mod_num = p_num + q_num + t_num;
 	L = q_num - 1;
 	K = pVec.size();

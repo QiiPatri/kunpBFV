@@ -145,6 +145,7 @@ void BFVContext::getPrimeBFV()
 		break;
 
 	default:
+		printf("系统不支持参数logN = %d,请使用系统默认参数或手动配置参数列表\n", logN);
 		break;
 	}
 }
