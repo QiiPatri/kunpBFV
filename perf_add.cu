@@ -12,7 +12,7 @@ using namespace std;
 #include "include/BFVcontext.cuh"
 
 int main(int argc, char* argv[]){
-    size_t poly_modulus_degree = 32768;
+    size_t poly_modulus_degree = argc > 1 ? 1 << atoi(argv[1]) : 32768;
     BFVContext context(poly_modulus_degree);
     BFVScheme scheme(context);
     SecretKey sk(context);
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]){
     Plaintext plain1(N,L,L,slots); Plaintext plain2(N,L,L,slots);
     Ciphertext c1(N,L,L,slots); Ciphertext c2(N,L,L,slots);
 
-    const int round = 15; const int warmup = 5;
+    const int round = 105; const int warmup = 5;
     float enc_time=0, add_time=0, cadd_time=0, dec_time=0, temp=0;
     cudaEvent_t start,end; cudaEventCreate(&start); cudaEventCreate(&end);
 
