@@ -234,11 +234,10 @@ void BFVScheme::mult_23(Ciphertext &cipher_res, Ciphertext &cipher1, Ciphertext 
     context.ToNTTInplace(cipher_res.cipher_device, 0, K, 2, l + 1, L + 1);
 
     // d2*evk.a + (a0b1 + a1b0)
-    cipher_add_axbx_batch_device(cipher_res.cipher_device, axbx1_mul, bxbx_mul, N, K, l+1, L+1);
+    cipher_add_axbx_batch_device(cipher_res.cipher_device, context.mult_scale_buffer, axbx1_mul, bxbx_mul, N, K, l+1, L+1);
     // cudaMemset
 
     // cudaMemcpy(cipher_res.cipher_device, bxbx_mul, sizeof(uint64_tt) * slots * (L + 1), cudaMemcpyDeviceToDevice);
-    cudaMemcpyAsync(cipher_res.cipher_device, context.mult_scale_buffer, 2 * N * (L + 1) * sizeof(uint64_tt), cudaMemcpyDeviceToDevice);
 }
 
 void BFVScheme::multAndEqual_23(Ciphertext &cipher1, Ciphertext &cipher2)
@@ -302,10 +301,9 @@ void BFVScheme::multAndEqual_23(Ciphertext &cipher1, Ciphertext &cipher2)
     context.ToNTTInplace(cipher1.cipher_device, 0, K, 2, l + 1, L + 1);
 
     // d2*evk.a + (a0b1 + a1b0)
-    cipher_add_axbx_batch_device(cipher1.cipher_device, axbx1_mul, bxbx_mul, N, K, l+1, L+1);
+    cipher_add_axbx_batch_device(cipher1.cipher_device, context.mult_scale_buffer, axbx1_mul, bxbx_mul, N, K, l+1, L+1);
     // print_device_array(cipher1.bx_device, N, L+1, "bx_device");
 
-    cudaMemcpyAsync(cipher1.cipher_device, context.mult_scale_buffer, 2 * N * (L + 1) * sizeof(uint64_tt), cudaMemcpyDeviceToDevice);
     // cudaMemcpy(cipher1.bx_device, bxbx_mul, sizeof(uint64_tt) * slots * (L + 1), cudaMemcpyDeviceToDevice);
 }
 

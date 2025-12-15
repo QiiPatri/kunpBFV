@@ -377,6 +377,13 @@ __host__ void cipher_add_axbx_batch_device(uint64_tt* cipher_device, uint64_tt* 
     dim3 add_dim(n / poly_block, mod_num);
     cipher_add_axbx_batch_device_kernel<<< add_dim, poly_block >>>(cipher_device, ax_device, bx_device, n, idx_mod, q_num);
 }
+__host__ void cipher_add_axbx_batch_device(uint64_tt* cipher_device, uint64_tt* buffer_device, uint64_tt* ax_device, uint64_tt* bx_device, uint32_tt n, int idx_mod, int mod_num, int q_num)
+{
+    dim3 add_dim(n / poly_block, mod_num);
+    cipher_add_axbx_batch_device_kernel<<< add_dim, poly_block >>>(cipher_device, ax_device, bx_device, n, idx_mod, q_num);
+
+    cudaMemcpyAsync(cipher_device, buffer_device, 2 * n * q_num * sizeof(uint64_tt), cudaMemcpyDeviceToDevice);
+}
 
 // c = a + b
 __host__ void poly_add_3param_batch_device(uint64_tt* device_c, uint64_tt* device_a, uint64_tt* device_b, uint32_tt n, int idx_c, int idx_a, int idx_b, int idx_mod, int mod_num)
