@@ -420,6 +420,16 @@ void print_device_array_from_symbol(uint64_tt* data, int slots, const char* vnam
     free(array_PQ);
 }
 
+void print_host_array_pm(uint64_tt* data, int slots, uint64_tt plain_modulus)
+{
+    int start = 0;
+    int end = min(start + 8, slots);
+    for(int i = start; i < end; i++)
+    {
+        printf("%llu ", data[i] % plain_modulus);
+    }
+    printf("\n");
+}
 void print_host_array(uint64_tt* data, int slots, const char* vname)
 {
     printf("%s = [", vname);

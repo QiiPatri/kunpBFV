@@ -205,5 +205,7 @@ public:
         gridDimGlb, blockDimGlb, sizeof(uint64_t) * obase_size * ibase_size, stream>>>(
                 dst, temp, qiHat_mod_pj, alpha_Q_mod_pj, qinv, obaseMu_high ,obaseMu_low , ibase, ibase_size, obase,
                 obase_size, n);
+
+    cudaFree(temp);
     }
 };

@@ -1,6 +1,7 @@
 correct_add
 correct_encrypt
 correct_mult
+correct_NTT
 correct_bootstrap
 perf_add
 perf_encrypt

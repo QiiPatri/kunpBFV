@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
 
     Plaintext plain(N,L,L,slots); Ciphertext c(N,L,L,slots);
 
-    const int round = 105; const int warmup = 5; float ecd=0, enc=0, dec=0, dcd=0, temp=0;
+    const int round = 80000; const int warmup = 0; float ecd=0, enc=0, dec=0, dcd=0, temp=0;
     cudaEvent_t start,end; cudaEventCreate(&start); cudaEventCreate(&end);
 
     for(int i=0;i<round;++i){
@@ -36,8 +36,11 @@ int main(int argc, char* argv[]){
 
     int iters = round - warmup;
     // printf("perf_encrypt: encode(us): %f avg\n", ecd/iters*1000);
-    printf("BFV: 加密(us): %f avg\n", (enc + ecd)/iters*1000);
-    printf("BFV: 解密(us): %f avg\n", (dec + dcd)/iters*1000);
+    // printf("BFV: 加密(us): %f avg\n", (enc + ecd)/iters*1000);
+    // printf("BFV: 解密(us): %f avg\n", (dec + dcd)/iters*1000);
+    printf("BFV: 加密总耗时(us): %f, 执行次数：%d, 平均耗时(us): %f\n", (enc + ecd)*1000, iters, (enc + ecd)/iters*1000);
+    printf("BFV: 解密总耗时(us): %f, 执行次数：%d, 平均耗时(us): %f\n", (dec + dcd)*1000, iters, (dec + dcd)/iters*1000);
+    
     // printf("perf_encrypt: decode(us): %f avg\n", dcd/iters*1000);
 
     cudaFree(d_msg); delete[] mes; return 0;

@@ -28,27 +28,28 @@ int main(int argc, char* argv[]){
     Plaintext plain1(N,L,L,slots); Plaintext plain2(N,L,L,slots);
     Ciphertext c1(N,L,L,slots); Ciphertext c2(N,L,L,slots);
 
-    const int round = 105; const int warmup = 5;
+    const int round = 500000; const int warmup = 0;
     float enc_time=0, add_time=0, cadd_time=0, dec_time=0, temp=0;
     cudaEvent_t start,end; cudaEventCreate(&start); cudaEventCreate(&end);
-
+    context.encode(d_msg1, plain1);
+    context.encode(d_msg2, plain2);
+    scheme.encryptMsg(c1, plain1);
     for(int i=0;i<round;++i){
-        cudaEventRecord(start); context.encode(d_msg1, plain1); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) enc_time+=temp;
-        context.encode(d_msg2, plain2);
-        cudaEventRecord(start); scheme.encryptMsg(c1, plain1); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) enc_time+=temp;
-        scheme.encryptMsg(c2, plain2);
+
 
         cudaEventRecord(start); scheme.addAndEqual(c1, c2); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) add_time+=temp;
 
         cudaEventRecord(start); scheme.addConstAndEqual(c1, plain1); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) cadd_time+=temp;
 
-        Plaintext plain_dec(N,L,L,slots); cudaEventRecord(start); scheme.decryptMsg(plain_dec, sk, c1); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) dec_time+=temp;
+        // Plaintext plain_dec(N,L,L,slots); cudaEventRecord(start); scheme.decryptMsg(plain_dec, sk, c1); cudaEventRecord(end); cudaEventSynchronize(end); cudaEventElapsedTime(&temp,start,end); if(i>=warmup) dec_time+=temp;
     }
 
     int iters = round - warmup;
     // printf("perf_add: enc(us): %f avg\n", enc_time/iters*1000);
-    printf("BFV: 密文-密文加法(us): %f avg\n", add_time/iters*1000);
-    printf("BFV: 密文-明文加法(us): %f avg\n", cadd_time/iters*1000);
+    // printf("BFV: 密文-密文加法(us): %f avg\n", add_time/iters*1000);
+    // printf("BFV: 密文-明文加法(us): %f avg\n", cadd_time/iters*1000);
+    printf("BFV: 密文-密文加法总耗时(us): %f, 执行次数：%d, 平均耗时(us): %f\n", add_time*1000, iters, add_time/iters*1000);
+    printf("BFV: 密文-明文加法总耗时(us): %f, 执行次数：%d, 平均耗时(us): %f\n", cadd_time*1000, iters, cadd_time/iters*1000);
     // printf("perf_add: dec(us): %f avg\n", dec_time/iters*1000);
 
     cudaFree(d_msg1); cudaFree(d_msg2); delete[] mes1; delete[] mes2;

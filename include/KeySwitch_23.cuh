@@ -824,7 +824,7 @@ void BFVScheme::compute_t_QInv_c0c1c2(uint64_tt *axbx1_mul, uint64_tt *axax_mul,
 
     context.FromNTTInplace(context.mult_buffer, 0, K, 1, l+1, L+1);
     hps_decrypt_scale_and_round(context.mult_buffer, context.mult_buffer, 0);
-    context.ToNTTInplace(context.mult_buffer, 0, K, 1, l+1, L+1);//NTT
+    context.ToNTTInplace(context.mult_buffer, 0, K, 1, l+1, L+1);
 
     cudaMemcpyAsync(context.mult_scale_buffer, cipher1.cipher_device, 2 * N * (L + 1) * sizeof(uint64_tt), cudaMemcpyDeviceToDevice);
     barrett_2batch_device(context.mult_scale_buffer, context.mult_buffer, N, 0, 0, K, cipher1.l+1, L+1);
@@ -898,6 +898,8 @@ void BFVScheme::compute_t_QInv_c0c1c2(uint64_tt *axbx1_mul, uint64_tt *axax_mul,
         context.RtoQ.bConv_HPS(enc_ptr, temp, N, 0);
         // context.RtoQ.bConv_HPS(enc_ptr, ct1_ptr + size_Q * N, N, 0);
 
+    cudaFree(temp);
+
         // if(i == 2)
         // {
         //     // print_device_array(enc_ptr , N , "Q_base");
@@ -921,6 +923,9 @@ void BFVScheme::compute_t_QInv_c0c1c2(uint64_tt *axbx1_mul, uint64_tt *axax_mul,
     // context.ToNTTInplace(cipher1.bx_device, 0, K, 1, l+1, L+1);
     // context.ToNTTInplace(cipher2.ax_device, 0, K, 1, l+1, L+1);
     // context.ToNTTInplace(cipher2.bx_device, 0, K, 1, l+1, L+1);
+
+    cudaFree(ct1);
+    cudaFree(ct2);
 }
 
 //compute [t/q * (c0,c1,c2)] for square
@@ -1004,6 +1009,7 @@ void BFVScheme::compute_t_QInv_c0c1c2_for_square(uint64_tt *axbx1_mul, uint64_tt
             context.tRSHatInvModsDivsModr_, context.tRSHatInvModsDivsFrac_, size_Q , size_R , N , 0);
         // Rl -> Ql
         context.RtoQ.bConv_HPS(enc_ptr, temp, N, 0);
+        cudaFree(temp);
     }
 
     //NTT
@@ -1013,4 +1019,5 @@ void BFVScheme::compute_t_QInv_c0c1c2_for_square(uint64_tt *axbx1_mul, uint64_tt
 
     // context.ToNTTInplace(cipher.ax_device, 0, K, 1, l+1, L+1);
     // context.ToNTTInplace(cipher.bx_device, 0, K, 1, l+1, L+1);
+    cudaFree(ct1);
 }

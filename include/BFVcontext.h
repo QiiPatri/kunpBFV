@@ -42,6 +42,9 @@ class BFVContext{
 	//bfv_encode_ntt
 	__host__ void FromNTTInplace_for_BFV(uint64_tt* device_a, int start_poly_idx, int start_mod_idx, int poly_num, int mod_num, int poly_mod_len);
 	__host__ void ToNTTInplace_for_BFV(uint64_tt* device_a, int start_poly_idx, int start_mod_idx, int poly_num, int mod_num, int poly_mod_len);
+	//for test
+	__host__ void FromNTTInplace_for_Test(uint64_tt* device_a, int start_poly_idx, int start_mod_idx, int poly_num, int mod_num, int poly_mod_len);
+	__host__ void ToNTTInplace_for_Test(uint64_tt* device_a, int start_poly_idx, int start_mod_idx, int poly_num, int mod_num, int poly_mod_len);
 
 	//bfv_mult_ntt
 	__host__ void FromNTTInplace_for_QR(uint64_tt* device_a, int start_poly_idx, int start_mod_idx, int poly_num, int mod_num, int poly_mod_len);

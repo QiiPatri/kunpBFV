@@ -1759,3 +1759,83 @@ __host__ void BFVContext::ToNTTInplace_for_QR(uint64_tt* device_a, int start_pol
     NTT8pointPerThread_kernel2_for_QR<<<gridDim, blockDim, per_block_memory>>>
                                 (device_a, qr_psi_table_device, qr_psi_shoup_table_device, poly_num, start_poly_idx, mod_num, start_mod_idx, N,first_stage_radix_size, second_radix_size, poly_mod_len);
 }
+
+//for test
+__host__ void BFVContext::FromNTTInplace_for_Test(uint64_tt* device_a, int start_poly_idx, int start_mod_idx, int poly_num, int mod_num, int poly_mod_len)
+{
+    int block_size = 128;
+	mod_num = 1;
+	poly_num = 1;
+    int grid_size = N * mod_num / (8 * block_size);
+    dim3 gridDim(grid_size, poly_num);
+    dim3 blockDim(block_size);
+    const int per_thread_ntt_size = 8;
+    const int second_radix_size = 256; 
+    const int first_stage_radix_size = N / second_radix_size;//N1
+    const int pad = 4;
+    int block_size2 = (first_stage_radix_size / 8) * pad;
+    int grid_size2 = N * mod_num / (8 * block_size2);
+    dim3 gridDim2(grid_size2, poly_num);
+    dim3 blockDim2(block_size2);
+
+	uint64_tt* host_1 = new uint64_tt[slots];
+	uint64_tt* host_2 = new uint64_tt[slots];
+
+	uint64_tt* n1ntt_res; cudaMalloc(&n1ntt_res, sizeof(uint64_tt)*slots);
+
+    // the same thread span，the same operation is N/8(8-point)/128(block threads' num)
+    const int per_block_memory = blockDim.x * per_thread_ntt_size * sizeof(uint64_tt);
+    INTT8pointPerThread_for_test_kernel1<<<gridDim, blockDim, per_block_memory>>>
+                            (device_a, plainModPsiInv_device, plainMod_shoup_inv_device, poly_num, start_poly_idx, mod_num, start_mod_idx, N, first_stage_radix_size, second_radix_size, poly_mod_len, plain_modulus, n1ntt_res);	
+    cudaMemcpy(host_2, n1ntt_res, sizeof(uint64_tt)*slots, cudaMemcpyDeviceToHost);
+	printf("N1-INTT结果:  ");print_host_array_pm(host_2, 8, plain_modulus);
+	cudaMemcpy(host_1, device_a, sizeof(uint64_tt)*slots, cudaMemcpyDeviceToHost);
+	printf("哈达玛积结果: ");print_host_array_pm(host_1, 8, plain_modulus);
+
+	INTT8pointPerThread_for_test_kernel2<<<gridDim2, blockDim2,
+                            (first_stage_radix_size + pad + 1) * pad * sizeof(uint64_tt)>>>
+                            (device_a, plainModPsiInv_device, plainMod_shoup_inv_device, n_inv_device_bfv, n_inv_shoup_device_bfv, poly_num, start_poly_idx, mod_num, start_mod_idx, N, first_stage_radix_size, pad, poly_mod_len, plain_modulus);
+	cudaMemcpy(host_2, device_a, sizeof(uint64_tt)*slots, cudaMemcpyDeviceToHost);
+	printf("N2-INTT结果:  ");print_host_array_pm(host_2, 8, plain_modulus);puts("");
+
+	cudaFree(n1ntt_res);
+	delete[] host_1;
+	delete[] host_2;
+}
+__host__ void BFVContext::ToNTTInplace_for_Test(uint64_tt* device_a, int start_poly_idx, int start_mod_idx, int poly_num, int mod_num, int poly_mod_len)
+{
+    int block_size = 128;
+	mod_num = 1;
+	poly_num = 1;
+    int grid_size = N * mod_num / (8 * block_size);
+    dim3 gridDim(grid_size, poly_num);
+    dim3 blockDim(block_size);//n1
+    const int per_thread_ntt_size = 8;
+    const int first_stage_radix_size = 256;//N1
+    const int second_radix_size = N / first_stage_radix_size;
+    const int pad = 4;// the same thread span，the same operation is N/8(8-point)/128(block threads' num)
+    const int per_block_memory = blockDim.x * per_thread_ntt_size * sizeof(uint64_tt);
+
+	uint64_tt* host_1 = new uint64_tt[slots];
+	uint64_tt* host_2 = new uint64_tt[slots];
+
+	uint64_tt* n1ntt_res; cudaMalloc(&n1ntt_res, sizeof(uint64_tt)*slots);
+
+    NTT8pointPerThread_for_test_kernel1<<<gridDim, (first_stage_radix_size / 8) * pad,
+                              (first_stage_radix_size + pad + 1) * pad * sizeof(uint64_tt)>>>
+                             (device_a, plainModPsi_device, plainMod_shoup_device, poly_num, start_poly_idx, mod_num, start_mod_idx, N,first_stage_radix_size, pad, poly_mod_len, plain_modulus, n1ntt_res);
+
+	cudaMemcpy(host_2, n1ntt_res, sizeof(uint64_tt)*slots, cudaMemcpyDeviceToHost);
+	printf("N1-NTT结果:   ");print_host_array_pm(host_2, 8, plain_modulus);
+	cudaMemcpy(host_1, device_a, sizeof(uint64_tt)*slots, cudaMemcpyDeviceToHost);
+	printf("哈达玛积结果: ");print_host_array_pm(host_1, 8, plain_modulus);
+
+	NTT8pointPerThread_for_test_kernel2<<<gridDim, blockDim, per_block_memory>>>
+                            (device_a, plainModPsi_device, plainMod_shoup_device, poly_num, start_poly_idx, mod_num, start_mod_idx, N,first_stage_radix_size, second_radix_size, poly_mod_len, plain_modulus);
+	cudaMemcpy(host_2, device_a, sizeof(uint64_tt)*slots, cudaMemcpyDeviceToHost);
+	printf("N2-NTT结果:   ");print_host_array_pm(host_2, 8, plain_modulus);puts("");
+
+	cudaFree(n1ntt_res);
+	delete[] host_1;
+	delete[] host_2;
+}
